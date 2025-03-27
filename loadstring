@@ -132,11 +132,13 @@ local Settings = {
     AimPredictionX = getgenv().Holy.Combat.Aimbot.PredictionX,
     AimPredictionY = getgenv().Holy.Combat.Aimbot.PredictionY,
     MouseTpSmoothing = function() return getgenv().Holy.Combat.Aimbot.MouseTp.Smoothness end,
-    MouseTpPredictionX = getgenv().Holy.Combat.Aimbot.MouseTp.PredictionX, 
-    MouseTpPredictionY = getgenv().Holy.Combat.Aimbot.MouseTp.PredictionY, 
+    MouseTpPredictionX = getgenv().Holy.Combat.Aimbot.MouseTp.PredictionX,
+    MouseTpPredictionY = getgenv().Holy.Combat.Aimbot.MouseTp.PredictionY,
     EasingStyles = {"Linear", "Sine", "Quad", "Cubic", "Exponential", "Back", "Bounce", "Elastic"},
-    EasingStyle = "Back",
-    EasingDirection = "Out",
+    EasingStyle = getgenv().Holy.Combat.Aimbot.EasingStyle,
+    EasingDirection = getgenv().Holy.Combat.Aimbot.EasingDirection,
+    MouseTpEasingStyle = getgenv().Holy.Combat.Aimbot.MouseTp.EasingStyle,
+    MouseTpEasingDirection = getgenv().Holy.Combat.Aimbot.MouseTp.EasingDirection,
     MaxDistance = 1000,
     FieldOfView = 70,
     MinHealth = 0,
@@ -626,7 +628,7 @@ RunService.Heartbeat:Connect(function(deltaTime)
             goalPosition = targetPart.Position + (resolvePartVelocity(targetPart) * adjustPrediction(targetData, targetPart))
         end
         local goal = newCFrame(Camera.CFrame.Position, goalPosition)
-        local easedProgress = applyEasing(1 - math.pow(1 - alpha, deltaTime * 60), Settings.EasingStyle, Settings.EasingDirection)
+        local easedProgress = applyEasing(1 - math.pow(1 - alpha, deltaTime * 60), targetData.EasingStyle, targetData.EasingDirection)
         Camera.CFrame = Camera.CFrame:Lerp(goal, easedProgress)
 
         local checks = getgenv().Holy.Checks
@@ -663,8 +665,7 @@ local function updateMousePosition(position)
 end
 
 local function handleMouseTp(deltaTime)
-    local mouseTpEnabled = getgenv().Holy.Combat.Aimbot.MouseTp.Enabled
-    if not mouseTpEnabled then return end
+    if not getgenv().Holy.Combat.Aimbot.MouseTp.Enabled then return end
     if not IsLocking or not TargetPlayer then return end
 
     local character = TargetPlayer.Character
@@ -677,7 +678,7 @@ local function handleMouseTp(deltaTime)
     local delta = tick() - LastUpdate
     local speed = math.clamp(Settings.MouseTpSmoothing(), 0, 1)
     local alpha = 1 - math.pow(1 - speed, delta * 60)
-    local easedProgress = applyEasing(alpha, Settings.EasingStyle, Settings.EasingDirection)
+    local easedProgress = applyEasing(alpha, Settings.MouseTpEasingStyle, Settings.MouseTpEasingDirection)
     local screenPos, onScreen = Camera:WorldToViewportPoint(predictedPosition)
 
     if onScreen and MainEvent then
